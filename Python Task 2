@@ -1,0 +1,76 @@
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import os
+
+def generate_invoice(invoice_data, filename):
+    
+    c = canvas.Canvas(filename, pagesize=letter)
+
+
+    c.setFont("Helvetica-Bold", 16)
+
+    c.drawCentredString(300, 750, "Invoice")
+
+
+    c.setFont("Helvetica", 12)
+    c.drawString(50, 700, f"Invoice Number: {invoice_data['invoice_number']}")
+    c.drawString(50, 680, f"Date: {invoice_data['date']}")
+    c.drawString(50, 660, f"Customer Name: {invoice_data['customer_name']}")
+    c.drawString(50, 640, f"Customer Address: {invoice_data['customer_address']}")
+
+
+    c.line(50, 630, 550, 630)
+
+    c.drawString(50, 610, "Item")
+    c.drawString(200, 610, "Quantity")
+    c.drawString(300, 610, "Price")
+
+    y_position = 590
+    for item in invoice_data['items']:
+        c.drawString(50, y_position, item['name'])
+        c.drawString(200, y_position, str(item['quantity']))
+        c.drawString(300, y_position, str(item['price']))
+        y_position -= 20
+
+    c.drawString(50, y_position - 20, f"Total: {invoice_data['total']}")
+
+    c.save()
+
+def main():
+    invoice_number = input("Enter Invoice Number: ")
+    date = input("Enter Date (YYYY-MM-DD): ")
+    customer_name = input("Enter Customer Name: ")
+    customer_address = input("Enter Customer Address: ")
+
+    items = []
+    while True:
+        item_name = input("Enter Item Name (leave empty to finish): ")
+        if not item_name:
+            break
+        quantity = int(input("Enter Quantity: "))
+        price = float(input("Enter Price per Item: "))
+        items.append({
+            'name': item_name,
+            'quantity': quantity,
+            'price': price
+        })
+
+    total_amount = sum(item['quantity'] * item['price'] for item in items)
+
+
+    invoice_data = {
+        'invoice_number': invoice_number,
+        'date': date,
+        'customer_name': customer_name,
+        'customer_address': customer_address,
+        'items': items,
+        'total': total_amount
+    }
+
+    filename = f"Invoice_{invoice_number}.pdf"
+    generate_invoice(invoice_data, filename)
+
+    print(f"Invoice generated successfully as '{filename}'.")
+
+if __name__ == "__main__":
+    main()
